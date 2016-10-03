@@ -1,0 +1,15 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/quit_item"
+        android:orderInCategory="2"
+        android:title="退出"
+        android:icon="@drawable/quit"
+        />
+    <item
+        android:id="@+id/small_item"
+        android:title="最小化"
+        android:orderInCategory="1"
+        android:icon="@drawable/release"/>
+
+
+</menu>
