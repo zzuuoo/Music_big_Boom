@@ -17,6 +17,7 @@ import static com.yezi.zuo.music_big_boom.MediaData.*;
 
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -26,16 +27,18 @@ import java.util.List;
 /**
  * Created by zuo on 2016/10/2.
  */
-public class MediaService extends Service {
+public class MediaService extends Service implements Runnable{
 
-    private static MediaPlayer mediaPlayer =null;
-    private static int position=0;//歌曲位置
-    private static int mode=0;//播放模式,模式0，列表循环；1，随机；2，单曲；
+    public static MediaPlayer mediaPlayer =null;
+    public static int position=0;//歌曲位置
+    public static int mode=0;//播放模式,模式0，列表循环；1，随机；2，单曲；
 
     //播放状态
     private final static int PLAYING=1;
     private final static int STOPPING=0;
-    private static int flag;
+
+
+
 
     //广播
     private IntentFilter  intentfilter_service;
@@ -56,8 +59,10 @@ public class MediaService extends Service {
         initMediaplay();//初始化mediaPlayer
         completionListener();//监听是否播完
         nitification();//前台服务
+//        flag=2;
 
     }
+
 
     private void initMediaplay(){
         if(mediaPlayer != null){
@@ -66,7 +71,7 @@ public class MediaService extends Service {
             mediaPlayer=null;
         }else{
             mediaPlayer = new MediaPlayer();
-            flag=1;
+//            flag=1;
         }
     }//初始化mediaPlayer
 
@@ -75,7 +80,7 @@ public class MediaService extends Service {
         Media media = mediaList.get(position);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(MediaService.this);
         builder.setSmallIcon(R.drawable.hh);
-        builder.setContentTitle("MusicGoGoGo");
+        builder.setContentTitle("Music_big_Boom");
         builder.setContentText(media.getDisplay_name());
         Intent intent =new Intent(MediaService.this,MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(MediaService.this,0,intent,
@@ -167,17 +172,18 @@ public class MediaService extends Service {
 
     public void playMusic(){
         Media media = mediaList.get(position);
-        flag=0;
+//        flag=0;
         nitification();
         try{
             mediaPlayer.reset();
             mediaPlayer.setDataSource(media.getData());
             mediaPlayer.prepare();
             mediaPlayer.start();
-            mediaPlayer.setLooping(false);
+//            mediaPlayer.setLooping(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        new Thread(MediaService.this).start();//进度条开始
         sendButton();
     }
 
@@ -196,6 +202,35 @@ public class MediaService extends Service {
         localBroadcastManager_service.sendBroadcast(intent);
     }
 
+    @Override
+    public void run() {
+        int correntPosition = 0;//设置默认进度条当前位置
+        int total=0;
+        if(mediaPlayer!=null&&mediaPlayer.isPlaying()){
+            total = mediaPlayer.getDuration();
+        }
+//        int total = mediaPlayer.getDuration();
+        while(mediaPlayer!= null&&correntPosition<total){
+            try{
+                Thread.sleep(1000);
+                if(mediaPlayer!=null&&mediaPlayer.isPlaying()){
+                    correntPosition = mediaPlayer.getCurrentPosition();
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            MainActivity.progressBar.setProgress(correntPosition);
+        }
+    }
+
+
+//    public class BackReceive extends BroadcastReceiver{
+//
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            sendButton();
+//        }
+//    }
 
     public class ServiceReceive extends BroadcastReceiver {
         @Override
@@ -205,12 +240,16 @@ public class MediaService extends Service {
             int funtion = intent.getIntExtra("funtion",0);
             switch (funtion){
                 case 0:
-                    if(flag!=1){
+//                    Toast.makeText(context,"aaa",Toast.LENGTH_SHORT).show();
+                    if(mediaPlayer!=null){
+//                        Toast.makeText(context,"bbb",Toast.LENGTH_SHORT).show();
                         if(mediaPlayer.isPlaying()){
+//                            Toast.makeText(context,"ccc",Toast.LENGTH_SHORT).show();
                             mediaPlayer.pause();
 
                         }else{
                             mediaPlayer.start();
+//                            Toast.makeText(context,"ddd",Toast.LENGTH_SHORT).show();
                         }
                     }else{
                         playMusic();

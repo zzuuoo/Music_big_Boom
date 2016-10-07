@@ -21,6 +21,7 @@ import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,14 +30,16 @@ import static com.yezi.zuo.music_big_boom.MediaData.*;
 
 public class MainActivity extends Activity implements View.OnClickListener,ActivityCompat.OnRequestPermissionsResultCallback{
 
-    private static int position=0;
-    private static int mode=0;//模式0，列表循环；1，随机；2，单曲；
+    public static int position=0;
+    public static int mode=0;//模式0，列表循环；1，随机；2，单曲；
 
-    //1,上一首，2，下一首，0；暂停/播放
+    //-1,上一首，2，下一首，0；暂停/播放
     private final static int START=0;
     private final static int NEXT=1;
     private final static int PREVIOUS =-1;
     private final static int CHOICE=2;
+
+    public static SeekBar progressBar;
 
     //发广播专用
     private ActivityReceive localReceive_activity;
@@ -50,7 +53,10 @@ public class MainActivity extends Activity implements View.OnClickListener,Activ
         requestWindowFeature(Window.FEATURE_NO_TITLE);//去标题栏
         setContentView(R.layout.activity_main);
 
+        ActivityCollector.addActivity(this);
+
         applyPermission();//获取读音乐权限
+
 
         localBroadcastManager_activity = LocalBroadcastManager.getInstance(this);//获取实例
         init();
@@ -127,6 +133,51 @@ public class MainActivity extends Activity implements View.OnClickListener,Activ
         ImageButton next = (ImageButton) findViewById(R.id.next);
         ImageButton ro = (ImageButton)findViewById(R.id.around);
         TextView tv = (TextView)findViewById(R.id.textView);
+
+
+        if(MediaService.mediaPlayer!=null){
+            position=MediaService.position;
+            mode=MediaService.mode;
+            Media media = mediaList.get(position);
+            tv.setText(media.getDisplay_name());
+            switch (mode){
+                case 0:
+                    ro.setImageResource(R.drawable.orr);
+                    break;
+                case 1:
+                    ro.setImageResource(R.drawable.rand);
+                    break;
+                case 2:
+                    ro.setImageResource(R.drawable.single);
+                    break;
+                default:
+                    break;
+            }
+            if(MediaService.mediaPlayer.isPlaying()){
+
+                play.setImageResource(R.drawable.sp);
+            }else{
+                play.setImageResource(R.drawable.st);
+            }
+
+//            sendFuntion(0);
+
+
+        }
+        progressBar = (SeekBar) findViewById(R.id.seekbar);
+
+        /*进度条监听*/
+        progressBar.setOnSeekBarChangeListener(new ProgressBarChange());
+
+        if (MediaService.mediaPlayer!=null){
+            progressBar.setMax(MediaService.mediaPlayer.getDuration());
+            progressBar.setProgress(MediaService.mediaPlayer.getCurrentPosition());
+            position=MediaService.position;
+            mode=MediaService.mode;
+            Media media = mediaList.get(position);
+            tv.setText(media.getDisplay_name());
+        }
+
         tv.setOnClickListener(this);
         play.setOnClickListener(this);
         last.setOnClickListener(this);
@@ -153,12 +204,20 @@ public class MainActivity extends Activity implements View.OnClickListener,Activ
                 sendFuntion(CHOICE);
                 break;
             case R.id.textView:
+                StartPlaying();
                 break;
             default:
                 break;
 
         }
     }//按钮监听
+
+    public void StartPlaying(){
+        Intent intent = new Intent(MainActivity.this,MusicPlaying.class);
+        Media media = mediaList.get(position);
+        intent.putExtra("playName",media.getDisplay_name());
+        startActivity(intent);
+    }
 
     public void around() {
         ImageButton play = (ImageButton) findViewById(R.id.around);
@@ -241,12 +300,17 @@ public class MainActivity extends Activity implements View.OnClickListener,Activ
         localBroadcastManager_activity.sendBroadcast(intent);
     }//发广播
 
+//    public void sendUpdate(){
+//        Intent intent = new Intent("to.Service.for.back");
+//        localBroadcastManager_activity.sendBroadcast(intent);
+//    }//发广播
+
     public  class ActivityReceive extends BroadcastReceiver {//接收广播后的处理
         @Override
         public void onReceive(Context context, Intent intent) {
             int state;
             ImageButton play = (ImageButton) findViewById(R.id.stop);
-            state = intent.getIntExtra("state",2);
+            state = intent.getIntExtra("state",0);
             if(state==1){
                 play.setImageResource(R.drawable.sp);
             }else{
@@ -273,6 +337,13 @@ public class MainActivity extends Activity implements View.OnClickListener,Activ
 
         }
     }//收广播
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        ActivityCollector.finishAll();
+        ActivityCollector.removeActivity(this);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){

@@ -8,4 +8,5 @@ import java.util.List;
  */
 public class MediaData {
     public static List<Media> mediaList = new ArrayList<>();
+//    public static int flag=1;
 }

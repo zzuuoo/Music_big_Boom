@@ -5,66 +5,51 @@
     android:layout_gravity="bottom"
     >
 
-
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <SeekBar android:layout_column="2"
-            android:id="@+id/seekbar"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_span="100" />
-    </TableRow>
-
-
-
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_column="54"
         >
 
-
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/around"
+            android:id="@+id/around2"
             android:layout_margin="5dp"
             android:background="#00000000"
             android:src="@drawable/orr"
             android:layout_weight="1"
-            android:layout_column="38" />
+            android:layout_column="36" />
 
         <ImageButton
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/previous"
+            android:id="@+id/previous2"
             android:layout_margin="5dp"
             android:background="#00000000"
             android:src="@drawable/last_b"
             android:layout_weight="1"
+            android:layout_column="54" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/stop2"
+            android:layout_margin="5dp"
+            android:background="#00000000"
+            android:src="@drawable/st"
             android:layout_column="56" />
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/stop"
-            android:layout_margin="5dp"
-            android:background="#00000000"
-            android:src="@drawable/st"
-            android:layout_column="58" />
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/next"
+            android:id="@+id/next2"
             android:layout_margin="5dp"
             android:background="#00000000"
             android:src="@drawable/next_b"
             android:layout_weight="1"
-            android:layout_column="60" />
+            android:layout_column="58" />
     </TableRow>
 
 
